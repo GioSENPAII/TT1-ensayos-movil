@@ -1,13 +1,17 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../core/network/api_client.dart';
+import '../../core/storage/session_storage.dart';
 import '../../domain/entities/auth_tokens.dart';
+import '../../domain/entities/usuario_sesion.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDatasource _remote;
-  final FlutterSecureStorage _storage;
+  final SessionStorage _session;
+  final ApiClient _client;
 
-  AuthRepositoryImpl(this._remote, this._storage);
+  AuthRepositoryImpl(this._remote, this._session, this._client);
 
   @override
   Future<String> register({
@@ -16,6 +20,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String correo,
   }) =>
       _remote.register(nombre: nombre, apellidos: apellidos, correo: correo);
+
+  @override
+  Future<String> resendToken(String correo) => _remote.resendToken(correo);
 
   @override
   Future<AuthTokens> verifyToken({
@@ -33,22 +40,48 @@ class AuthRepositoryImpl implements AuthRepository {
       _remote.login(correo: correo, password: password);
 
   @override
-  Future<void> saveTokens(AuthTokens tokens) async {
-    await _storage.write(key: 'access_token', value: tokens.accessToken);
-    await _storage.write(key: 'refresh_token', value: tokens.refreshToken);
-    await _storage.write(key: 'nombre', value: tokens.nombre);
-    await _storage.write(key: 'correo', value: tokens.correo);
-    await _storage.write(key: 'rol', value: tokens.rol);
+  Future<String> forgotPassword(String correo) => _remote.forgotPassword(correo);
+
+  @override
+  Future<String> resetPassword({
+    required String correo,
+    required String codigo,
+    required String password,
+  }) =>
+      _remote.resetPassword(correo: correo, codigo: codigo, password: password);
+
+  @override
+  Future<void> saveSession(AuthTokens tokens) => _session.save(
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        nombre: tokens.nombre,
+        correo: tokens.correo,
+        rol: tokens.rol,
+      );
+
+  @override
+  Future<UsuarioSesion?> currentSession() async {
+    final refresh = await _session.refreshToken;
+    final nombre = await _session.nombre;
+    final correo = await _session.correo;
+    final rol = await _session.rol;
+    if (refresh == null || nombre == null || correo == null || rol == null) return null;
+    return UsuarioSesion(nombre: nombre, correo: correo, rol: rol);
   }
 
   @override
-  Future<void> clearTokens() async {
-    await _storage.deleteAll();
+  Future<void> logout() async {
+    final refresh = await _session.refreshToken;
+    if (refresh != null) {
+      try {
+        await _remote.logout(refresh);
+      } on AppException {
+        // CU-AUTH-05 E1: sin red se borra igual la sesión local; el token expira solo
+      }
+    }
+    await _session.clear();
   }
 
   @override
-  Future<String?> getAccessToken() => _storage.read(key: 'access_token');
-
-  @override
-  Future<String?> getNombre() => _storage.read(key: 'nombre');
+  Stream<void> get onSessionExpired => _client.onSessionExpired;
 }

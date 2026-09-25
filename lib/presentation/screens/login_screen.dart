@@ -4,7 +4,8 @@ import '../../core/theme/app_theme.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
-import 'home_placeholder_screen.dart';
+import '../../core/utils/validators.dart';
+import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -40,21 +41,15 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocListener<AuthBloc, AuthState>(
+        // La navegación al iniciar sesión la hace el AuthGate (main.dart)
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => HomePlaceholderScreen(
-                  nombre: state.nombre,
-                  correo: state.correo,
-                ),
-              ),
-            );
-          } else if (state is AuthError) {
+          // Solo la pantalla visible reacciona (las de abajo en la pila escuchan el mismo bloc)
+          if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
+          if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red.shade700,
+                backgroundColor: AppTheme.rojoDeficiente,
               ),
             );
           }
@@ -106,13 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Correo institucional',
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Ingresa tu correo';
-                        }
-                        if (!v.contains('@')) return 'Correo inválido';
-                        return null;
-                      },
+                      validator: Validators.correo,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -132,7 +121,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       validator: (v) =>
                           (v == null || v.isEmpty) ? 'Ingresa tu contraseña' : null,
                     ),
-                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                        ),
+                        child: const Text('¿Olvidaste tu contraseña?',
+                            style: TextStyle(color: AppTheme.guinda)),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
                         if (state is AuthLoading) {

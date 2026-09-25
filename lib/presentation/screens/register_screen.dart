@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
+import '../../core/utils/validators.dart';
 import 'token_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -43,6 +44,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: Colors.white,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
+          // Solo la pantalla visible reacciona (las de abajo en la pila escuchan el mismo bloc)
+          if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
           if (state is RegisterTokenSent) {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -55,7 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red.shade700,
+                backgroundColor: AppTheme.rojoDeficiente,
               ),
             );
           }
@@ -112,15 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       prefixIcon: Icon(Icons.email_outlined),
                       hintText: 'usuario@alumno.ipn.mx',
                     ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Ingresa tu correo';
-                      }
-                      if (!v.trim().toLowerCase().endsWith('@alumno.ipn.mx')) {
-                        return 'Debes usar tu correo @alumno.ipn.mx';
-                      }
-                      return null;
-                    },
+                    validator: Validators.correoAlumno,
                   ),
                   const SizedBox(height: 32),
                   BlocBuilder<AuthBloc, AuthState>(

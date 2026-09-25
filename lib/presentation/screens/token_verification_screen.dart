@@ -4,7 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
-import 'home_placeholder_screen.dart';
+import '../../core/utils/validators.dart';
 
 class TokenVerificationScreen extends StatefulWidget {
   final String correo;
@@ -50,22 +50,19 @@ class _TokenVerificationScreenState extends State<TokenVerificationScreen> {
       appBar: AppBar(title: const Text('Verificar cuenta')),
       backgroundColor: Colors.white,
       body: BlocListener<AuthBloc, AuthState>(
+        // Al crear la cuenta, el AuthGate (main.dart) lleva al alumno a Inicio
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (_) => HomePlaceholderScreen(
-                  nombre: state.nombre,
-                  correo: state.correo,
-                ),
-              ),
-              (route) => false,
+          // Solo la pantalla visible reacciona (las de abajo en la pila escuchan el mismo bloc)
+          if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
+          if (state is TokenResent) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: AppTheme.verdeExito),
             );
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red.shade700,
+                backgroundColor: AppTheme.rojoDeficiente,
               ),
             );
           }
@@ -82,20 +79,20 @@ class _TokenVerificationScreenState extends State<TokenVerificationScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      border: Border.all(color: Colors.blue.shade300),
+                      color: AppTheme.grisClaro,
+                      border: Border.all(color: AppTheme.guindaClaro),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.mark_email_read_outlined,
-                            color: Colors.blue.shade700),
+                        const Icon(Icons.mark_email_read_outlined,
+                            color: AppTheme.guinda),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Te enviamos un código a ${widget.correo}',
                             style: TextStyle(
-                              color: Colors.blue.shade900,
+                              color: AppTheme.negro,
                               fontSize: 14,
                             ),
                           ),
@@ -119,12 +116,7 @@ class _TokenVerificationScreenState extends State<TokenVerificationScreen> {
                       prefixIcon: Icon(Icons.pin_outlined),
                       counterText: '',
                     ),
-                    validator: (v) {
-                      if (v == null || v.trim().length != 6) {
-                        return 'El código debe tener exactamente 6 dígitos';
-                      }
-                      return null;
-                    },
+                    validator: Validators.codigo6Digitos,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -141,22 +133,7 @@ class _TokenVerificationScreenState extends State<TokenVerificationScreen> {
                             setState(() => _obscurePass = !_obscurePass),
                       ),
                     ),
-                    // RNF-10: mínimo 8 caracteres, una mayúscula, una minúscula y un número
-                    validator: (v) {
-                      if (v == null || v.length < 8) {
-                        return 'Mínimo 8 caracteres';
-                      }
-                      if (!RegExp(r'[A-Z]').hasMatch(v)) {
-                        return 'Debe incluir al menos una mayúscula';
-                      }
-                      if (!RegExp(r'[a-z]').hasMatch(v)) {
-                        return 'Debe incluir al menos una minúscula';
-                      }
-                      if (!RegExp(r'\d').hasMatch(v)) {
-                        return 'Debe incluir al menos un número';
-                      }
-                      return null;
-                    },
+                    validator: Validators.password,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -197,6 +174,17 @@ class _TokenVerificationScreenState extends State<TokenVerificationScreen> {
                             style: TextStyle(fontSize: 16)),
                       );
                     },
+                  ),
+                  const SizedBox(height: 16),
+                  // CU-AUTH-01 E3: pedir otro código sin reiniciar el registro
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context
+                          .read<AuthBloc>()
+                          .add(ResendTokenRequested(widget.correo)),
+                      child: const Text('¿No te llegó? Reenviar código',
+                          style: TextStyle(color: AppTheme.guinda)),
+                    ),
                   ),
                 ],
               ),

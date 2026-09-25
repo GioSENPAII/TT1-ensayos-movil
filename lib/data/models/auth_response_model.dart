@@ -1,5 +1,10 @@
+import 'package:json_annotation/json_annotation.dart';
+
 import '../../domain/entities/auth_tokens.dart';
 
+part 'auth_response_model.g.dart';
+
+@JsonSerializable(createToJson: false)
 class AuthResponseModel extends AuthTokens {
   const AuthResponseModel({
     required super.accessToken,
@@ -9,13 +14,6 @@ class AuthResponseModel extends AuthTokens {
     required super.rol,
   });
 
-  factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
-    return AuthResponseModel(
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String,
-      nombre: json['nombre'] as String,
-      correo: json['correo'] as String,
-      rol: json['rol'] as String,
-    );
-  }
+  factory AuthResponseModel.fromJson(Map<String, dynamic> json) =>
+      _$AuthResponseModelFromJson(json);
 }

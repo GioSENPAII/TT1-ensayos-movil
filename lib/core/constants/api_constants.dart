@@ -16,4 +16,8 @@ class ApiConstants {
   static const String misGrupos = '/students/me/groups';
   static const String unirseGrupo = '/groups/join';
   static String tareasDeGrupo(int groupId) => '/assignments?groupId=$groupId';
+
+  static const String entregas = '/submissions';
+  static const String misEntregas = '/students/me/submissions';
+  static String entrega(int id) => '/submissions/$id';
 }

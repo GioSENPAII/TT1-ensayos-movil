@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../constants/api_constants.dart';
 import '../errors/app_exceptions.dart';
@@ -38,15 +40,48 @@ class ApiClient {
 
   Future<dynamic> delete(String path) => _send('DELETE', path);
 
+  /// Sube un archivo como multipart/form-data. [timeout] es mayor que el normal porque el
+  /// servidor califica el ensayo antes de responder.
+  Future<dynamic> postArchivo(
+    String path, {
+    required Map<String, String> campos,
+    required String campoArchivo,
+    required String nombreArchivo,
+    required Uint8List bytes,
+    MediaType? tipo,
+    Duration timeout = _timeout,
+  }) {
+    // Se reconstruye en cada intento: un MultipartRequest no puede reenviarse
+    http.BaseRequest construir() => http.MultipartRequest('POST', _uri(path))
+      ..fields.addAll(campos)
+      ..files.add(http.MultipartFile.fromBytes(campoArchivo, bytes,
+          filename: nombreArchivo, contentType: tipo ?? MediaType('application', 'pdf')));
+    return _ejecutar(construir, auth: true, timeout: timeout);
+  }
+
   Future<dynamic> _send(String method, String path,
-      {Map<String, dynamic>? body, bool auth = true}) async {
-    var response = await _request(method, path, body, auth);
+      {Map<String, dynamic>? body, bool auth = true}) {
+    http.BaseRequest construir() {
+      final request = http.Request(method, _uri(path))
+        ..headers['Content-Type'] = 'application/json';
+      if (body != null) request.body = jsonEncode(body);
+      return request;
+    }
+
+    return _ejecutar(construir, auth: auth);
+  }
+
+  Uri _uri(String path) => Uri.parse('${ApiConstants.baseUrl}$path');
+
+  Future<dynamic> _ejecutar(http.BaseRequest Function() construir,
+      {required bool auth, Duration timeout = _timeout}) async {
+    var response = await _request(construir(), auth, timeout);
 
     if (auth && response.statusCode == 401) {
       if (!await _renovarSesion()) {
         throw const SessionExpiredException();
       }
-      response = await _request(method, path, body, auth);
+      response = await _request(construir(), auth, timeout);
       if (response.statusCode == 401) {
         await _expirarSesion();
         throw const SessionExpiredException();
@@ -55,20 +90,14 @@ class ApiClient {
     return _procesar(response);
   }
 
-  Future<http.Response> _request(
-      String method, String path, Map<String, dynamic>? body, bool auth) async {
-    final headers = <String, String>{'Content-Type': 'application/json'};
+  Future<http.Response> _request(http.BaseRequest request, bool auth, Duration timeout) async {
     if (auth) {
       final token = await _session.accessToken;
-      if (token != null) headers['Authorization'] = 'Bearer $token';
+      if (token != null) request.headers['Authorization'] = 'Bearer $token';
     }
-    final request = http.Request(method, Uri.parse('${ApiConstants.baseUrl}$path'))
-      ..headers.addAll(headers);
-    if (body != null) request.body = jsonEncode(body);
-
     try {
-      final streamed = await _http.send(request).timeout(_timeout);
-      return await http.Response.fromStream(streamed).timeout(_timeout);
+      final streamed = await _http.send(request).timeout(timeout);
+      return await http.Response.fromStream(streamed).timeout(timeout);
     } on SocketException {
       throw const NetworkException();
     } on TimeoutException {
@@ -113,8 +142,10 @@ class ApiClient {
       return false;
     }
     try {
-      final response = await _request(
-          'POST', ApiConstants.refreshToken, {'refreshToken': refresh}, false);
+      final request = http.Request('POST', _uri(ApiConstants.refreshToken))
+        ..headers['Content-Type'] = 'application/json'
+        ..body = jsonEncode({'refreshToken': refresh});
+      final response = await _request(request, false, _timeout);
       if (response.statusCode == 200) {
         final data = _decode(response) as Map<String, dynamic>;
         await _session.save(

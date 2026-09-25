@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/di/injector.dart';
+import '../bloc/grading/grading_bloc.dart';
+import '../bloc/grading/grading_event.dart';
 import '../bloc/group/group_bloc.dart';
 import '../bloc/group/group_event.dart';
 import 'home_screen.dart';
@@ -21,8 +23,11 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<GroupBloc>(
-      create: (_) => sl<GroupBloc>()..add(GroupsRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<GroupBloc>(create: (_) => sl<GroupBloc>()..add(GroupsRequested())),
+        BlocProvider<GradingBloc>(create: (_) => sl<GradingBloc>()..add(HistorialRequested())),
+      ],
       child: Scaffold(
         body: IndexedStack(
           index: _index,

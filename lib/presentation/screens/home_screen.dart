@@ -4,9 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/theme/app_theme.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_state.dart';
+import '../../core/utils/formatters.dart';
+import '../bloc/grading/grading_bloc.dart';
+import '../bloc/grading/grading_event.dart';
 import '../bloc/group/group_bloc.dart';
 import '../bloc/group/group_event.dart';
 import '../bloc/group/group_state.dart';
+import '../navigation/navegacion.dart';
 import '../widgets/mensaje_vacio.dart';
 import '../widgets/tarea_card.dart';
 import 'group_list_screen.dart';
@@ -24,9 +28,13 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _abrirGrupos(BuildContext context) {
-    final bloc = context.read<GroupBloc>();
+    final groupBloc = context.read<GroupBloc>();
+    final gradingBloc = context.read<GradingBloc>();
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => BlocProvider.value(value: bloc, child: const GroupListScreen()),
+      builder: (_) => MultiBlocProvider(
+        providers: [BlocProvider.value(value: groupBloc), BlocProvider.value(value: gradingBloc)],
+        child: const GroupListScreen(),
+      ),
     ));
   }
 
@@ -69,6 +77,7 @@ class HomeScreen extends StatelessWidget {
           return RefreshIndicator(
             color: AppTheme.guinda,
             onRefresh: () async {
+              context.read<GradingBloc>().add(HistorialRequested());
               final bloc = context.read<GroupBloc>()..add(GroupsRequested());
               await bloc.stream.firstWhere((s) => s.status != GroupsStatus.loading);
             },
@@ -90,6 +99,7 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () => _abrirUnirse(context),
                   )
                 else ...[
+                  const _UltimaCalificacion(),
                   _Seccion(titulo: 'Tareas pendientes', contador: pendientes.length),
                   const SizedBox(height: 8),
                   if (pendientes.isEmpty)
@@ -101,7 +111,7 @@ class HomeScreen extends StatelessWidget {
                   else
                     ...pendientes.map((t) => Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: TareaCard(tarea: t),
+                          child: TareaCard(tarea: t, onTap: () => abrirTarea(context, t)),
                         )),
                   const SizedBox(height: 24),
                   _Seccion(
@@ -159,6 +169,68 @@ class _Seccion extends StatelessWidget {
         const Spacer(),
         ?accion,
       ],
+    );
+  }
+}
+
+/// Acceso directo al último reporte recibido (Dashboard, sección 4.5.3 / Tabla 58).
+class _UltimaCalificacion extends StatelessWidget {
+  const _UltimaCalificacion();
+
+  @override
+  Widget build(BuildContext context) {
+    final ultima = context.select((GradingBloc b) => b.state.ultimaCalificada);
+    if (ultima == null || ultima.calificacionFinal == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Card(
+        color: AppTheme.guinda,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => abrirReporte(context, ultima.id),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Última calificación',
+                        style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text(Formatters.calificacion(ultima.calificacionFinal!),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        )),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(ultima.tarea,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      Text(ultima.grupo,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                      const SizedBox(height: 4),
+                      const Text('Ver reporte',
+                          style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

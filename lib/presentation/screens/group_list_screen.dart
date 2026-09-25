@@ -6,6 +6,7 @@ import '../../core/utils/formatters.dart';
 import '../bloc/group/group_bloc.dart';
 import '../bloc/group/group_event.dart';
 import '../bloc/group/group_state.dart';
+import '../navigation/navegacion.dart';
 import '../widgets/mensaje_vacio.dart';
 import '../widgets/tarea_card.dart';
 import 'join_group_screen.dart';
@@ -81,7 +82,11 @@ class GroupListScreen extends StatelessWidget {
                         : g.tareas
                             .map((t) => Padding(
                                   padding: const EdgeInsets.only(top: 8),
-                                  child: TareaCard(tarea: t, mostrarGrupo: false),
+                                  child: TareaCard(
+                                    tarea: t,
+                                    mostrarGrupo: false,
+                                    onTap: () => abrirTarea(context, t),
+                                  ),
                                 ))
                             .toList(),
                   ),

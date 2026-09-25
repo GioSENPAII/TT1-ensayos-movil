@@ -70,18 +70,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const SizedBox(height: 48),
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: 160,
+                      height: 160,
                       decoration: BoxDecoration(
-                        color: AppTheme.guinda,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(Icons.school,
-                          size: 48, color: Colors.white),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset(
+                          'assets/images/logo_ipn.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'ESCOM — TT1',
+                      'IPN',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

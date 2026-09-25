@@ -21,10 +21,12 @@ class AuthRemoteDatasource {
   }
 
   Future<AuthResponseModel> verifyToken({
+    required String correo,
     required String token,
     required String password,
   }) async {
     final data = await _client.post(ApiConstants.verifyToken, {
+      'correo': correo,
       'token': token,
       'password': password,
     });

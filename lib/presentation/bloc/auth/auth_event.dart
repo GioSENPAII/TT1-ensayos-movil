@@ -21,13 +21,18 @@ class RegisterSubmitted extends AuthEvent {
 }
 
 class VerifyTokenSubmitted extends AuthEvent {
+  final String correo;
   final String token;
   final String password;
 
-  VerifyTokenSubmitted({required this.token, required this.password});
+  VerifyTokenSubmitted({
+    required this.correo,
+    required this.token,
+    required this.password,
+  });
 
   @override
-  List<Object?> get props => [token, password];
+  List<Object?> get props => [correo, token, password];
 }
 
 class LoginSubmitted extends AuthEvent {

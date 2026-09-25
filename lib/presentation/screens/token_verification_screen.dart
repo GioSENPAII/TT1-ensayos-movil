@@ -38,6 +38,7 @@ class _TokenVerificationScreenState extends State<TokenVerificationScreen> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     context.read<AuthBloc>().add(VerifyTokenSubmitted(
+          correo: widget.correo,
           token: _tokenCtrl.text.trim(),
           password: _passwordCtrl.text,
         ));
@@ -140,9 +141,19 @@ class _TokenVerificationScreenState extends State<TokenVerificationScreen> {
                             setState(() => _obscurePass = !_obscurePass),
                       ),
                     ),
+                    // RNF-10: mínimo 8 caracteres, una mayúscula, una minúscula y un número
                     validator: (v) {
                       if (v == null || v.length < 8) {
                         return 'Mínimo 8 caracteres';
+                      }
+                      if (!RegExp(r'[A-Z]').hasMatch(v)) {
+                        return 'Debe incluir al menos una mayúscula';
+                      }
+                      if (!RegExp(r'[a-z]').hasMatch(v)) {
+                        return 'Debe incluir al menos una minúscula';
+                      }
+                      if (!RegExp(r'\d').hasMatch(v)) {
+                        return 'Debe incluir al menos un número';
                       }
                       return null;
                     },

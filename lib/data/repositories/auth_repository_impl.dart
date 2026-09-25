@@ -19,10 +19,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthTokens> verifyToken({
+    required String correo,
     required String token,
     required String password,
   }) =>
-      _remote.verifyToken(token: token, password: password);
+      _remote.verifyToken(correo: correo, token: token, password: password);
 
   @override
   Future<AuthTokens> login({

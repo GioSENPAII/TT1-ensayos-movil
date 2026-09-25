@@ -8,6 +8,7 @@ abstract class AuthRepository {
   });
 
   Future<AuthTokens> verifyToken({
+    required String correo,
     required String token,
     required String password,
   });

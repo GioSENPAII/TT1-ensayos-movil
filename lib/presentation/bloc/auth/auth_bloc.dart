@@ -31,6 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final tokens = await _repository.verifyToken(
+        correo: event.correo,
         token: event.token,
         password: event.password,
       );

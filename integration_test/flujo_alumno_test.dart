@@ -50,16 +50,16 @@ void main() {
     await t.tap(find.text('Ver todos'));
     await esperar(t, find.text('Mis grupos'));
     await t.tap(find.text('Sistemas Operativos 3CM1').last);
-    await esperar(t, find.text('Ensayo Diagnóstico'));
+    await esperar(t, find.text('Ensayo Unidad 2'));
     await captura(t, '03_mis_grupos');
 
-    // Unirse a un grupo: inactivo y código inexistente (CU-ALU-01 E1, E2)
+    // Unirse a un grupo: código inexistente y grupo al que ya pertenece (CU-ALU-01 E1, E3)
     await t.tap(find.text('Unirse a un grupo').last);
     await esperar(t, find.text('Unirme'));
-    await t.enterText(find.byType(TextFormField), 'so3cm2');
+    await t.enterText(find.byType(TextFormField), 'zz9zz9');
     await t.tap(find.text('Unirme'));
-    await esperar(t, find.text('Este grupo ya no acepta nuevos integrantes'));
-    await captura(t, '04_unirse_inactivo');
+    await esperar(t, find.textContaining('Código de acceso no válido'));
+    await captura(t, '04_unirse_codigo_invalido');
     // Como una persona: tocar el campo (el envío anterior cerró el teclado) y escribir
     await t.tap(find.byType(TextFormField));
     await t.pump(const Duration(milliseconds: 500));

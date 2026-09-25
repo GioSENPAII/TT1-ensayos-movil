@@ -1,6 +1,7 @@
 // Flujo de entrega de ensayo de punta a punta (CU-ALU-02, CU-ALU-03, CU-ALU-04) contra el backend
-// LOCAL con el motor de IA simulado y la BD recién sembrada:
-//   (ensayos-backend) docker compose down -v && docker compose up -d && MAIL_ENABLED=false ./run-local.sh
+// LOCAL con la BD recién sembrada. Usar el motor SIMULADO: el real guarda cada archivo en su historial
+// de plagio.
+//   (ensayos-backend) docker compose down -v && docker compose up -d && AI_MODE=simulado MAIL_ENABLED=false ./run-local.sh
 //   flutter drive --driver=test_driver/integration_test.dart \
 //     --target=integration_test/flujo_entrega_test.dart -d <simulador>
 import 'dart:typed_data';

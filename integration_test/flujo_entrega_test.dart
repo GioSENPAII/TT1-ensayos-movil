@@ -76,7 +76,9 @@ void main() {
     await esperar(t, find.text('Confirmar envío'));
     await captura(t, '12_confirmar_envio');
     await t.tap(find.text('Enviar ensayo'));
+    // C6: el servidor responde en cuanto recibe el archivo y la app consulta la calificación
     await esperar(t, find.text('Archivo recibido, procesando calificación...'));
+    expect(find.text('Salir y ver después'), findsOneWidget);
     await captura(t, '13_procesando');
 
     // Reporte (CU-ALU-03)

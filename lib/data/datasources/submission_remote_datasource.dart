@@ -4,10 +4,6 @@ import '../../domain/entities/archivo_pdf.dart';
 import '../models/entrega_model.dart';
 
 class SubmissionRemoteDatasource {
-  // Mientras la calificación sea síncrona (corrección C6 pendiente) la respuesta espera al motor de
-  // IA, que en frío puede tardar ~30 s. Se da margen amplio en lugar de los 20 s generales.
-  static const _timeoutEnvio = Duration(seconds: 90);
-
   final ApiClient _client;
   SubmissionRemoteDatasource(this._client);
 
@@ -17,8 +13,7 @@ class SubmissionRemoteDatasource {
       campos: {'assignmentId': '$tareaId'},
       campoArchivo: 'file',
       nombreArchivo: archivo.nombre,
-      bytes: archivo.bytes,
-      timeout: _timeoutEnvio,
+      bytes: archivo.bytes, // 20 s como cualquier petición (RF-ALU-06): el servidor responde 202 al recibir
     );
     return EntregaModel.fromJson(data as Map<String, dynamic>);
   }

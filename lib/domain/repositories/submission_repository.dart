@@ -2,7 +2,8 @@ import '../entities/archivo_pdf.dart';
 import '../entities/entrega.dart';
 
 abstract class SubmissionRepository {
-  /// Envía el ensayo y espera su calificación (CU-ALU-02).
+  /// Envía el ensayo; el servidor responde de inmediato con la entrega EN_REVISION y la califica en
+  /// segundo plano (RNF-09). El resultado se obtiene consultando [detalle] (CU-ALU-02).
   Future<Entrega> enviar({required int tareaId, required ArchivoPdf archivo});
 
   /// Historial del alumno, de la más reciente a la más antigua (CU-ALU-04).

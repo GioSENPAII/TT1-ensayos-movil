@@ -78,7 +78,7 @@ class _Contenido extends StatelessWidget {
             EstadoEntrega.enRevision => const MensajeVacio(
                 icono: Icons.hourglass_top_rounded,
                 titulo: 'Tu ensayo se está calificando',
-                detalle: 'Consulta de nuevo en unos momentos (desliza hacia abajo para actualizar).',
+                detalle: 'El reporte aparecerá aquí automáticamente en cuanto esté listo.',
               ),
             _ => MensajeVacio(
                 icono: Icons.error_outline,

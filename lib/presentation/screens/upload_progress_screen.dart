@@ -12,8 +12,9 @@ import '../bloc/submission/submission_state.dart';
 import '../navigation/navegacion.dart';
 import '../widgets/mensaje_vacio.dart';
 
-/// Procesamiento del envío (UploadProgressScreen, CU-ALU-02 pasos 6-7). Mientras se envía no se
-/// permite regresar, para evitar envíos duplicados (sección 4.6.4).
+/// Procesamiento del envío (UploadProgressScreen, CU-ALU-02 pasos 6-7). Mientras se sube el archivo
+/// no se permite regresar (sección 4.6.4). En cuanto el servidor lo recibe, el alumno puede salir:
+/// la calificación continúa en el servidor y aparecerá en su historial (RNF-09).
 class UploadProgressScreen extends StatelessWidget {
   final int tareaId;
   const UploadProgressScreen({super.key, required this.tareaId});
@@ -22,6 +23,11 @@ class UploadProgressScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<SubmissionBloc, SubmissionState>(
       listener: (context, state) {
+        if (state is Procesando && !state.lento && !state.sinConexion) {
+          // Recibido: la tarea ya aparece "En revisión" en Inicio, Mis grupos y el historial
+          context.read<GroupBloc>().add(GroupsRequested());
+          context.read<GradingBloc>().add(HistorialRequested());
+        }
         if (state is EnvioTerminado) {
           context.read<GroupBloc>().add(GroupsRequested());
           context.read<GradingBloc>().add(HistorialRequested());
@@ -32,6 +38,7 @@ class UploadProgressScreen extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        // Solo se bloquea el regreso mientras el archivo viaja al servidor
         final enviando = state is Enviando || state is ArchivoListo;
         return PopScope(
           canPop: !enviando,
@@ -59,7 +66,9 @@ class UploadProgressScreen extends StatelessWidget {
                       Navigator.of(context).pop();
                     },
                   ),
-                _ => const _Procesando(),
+                Procesando(:final lento, :final sinConexion) =>
+                    _Procesando(recibido: true, lento: lento, sinConexion: sinConexion),
+                _ => const _Procesando(recibido: false),
               },
             ),
           ),
@@ -70,27 +79,46 @@ class UploadProgressScreen extends StatelessWidget {
 }
 
 class _Procesando extends StatelessWidget {
-  const _Procesando();
+  /// El servidor ya tiene el archivo; solo falta la calificación.
+  final bool recibido;
+  final bool lento;
+  final bool sinConexion;
+  const _Procesando({required this.recibido, this.lento = false, this.sinConexion = false});
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(32),
+    final detalle = !recibido
+        ? 'Enviando tu archivo. No cierres la aplicación.'
+        : sinConexion
+            ? 'Sin conexión, reintentando… Tu ensayo ya se recibió y se sigue calificando.'
+            : lento
+                ? 'Está tardando más de lo normal. Puedes salir de esta pantalla: tu calificación '
+                    'aparecerá en "Mis entregas" cuando esté lista.'
+                : 'Esto suele tardar unos segundos. Puedes salir de esta pantalla: tu calificación '
+                    'aparecerá en "Mis entregas".';
+    return Padding(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
+          const SizedBox(
             width: 72,
             height: 72,
             child: CircularProgressIndicator(color: AppTheme.guinda, strokeWidth: 6),
           ),
-          SizedBox(height: 28),
-          Text('Archivo recibido, procesando calificación...',
+          const SizedBox(height: 28),
+          Text(recibido ? 'Archivo recibido, procesando calificación...' : 'Enviando archivo...',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.negro)),
-          SizedBox(height: 8),
-          Text('Esto puede tardar unos segundos. No cierres la aplicación.',
-              textAlign: TextAlign.center, style: TextStyle(color: AppTheme.grisInactivo)),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.negro)),
+          const SizedBox(height: 8),
+          Text(detalle, textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.grisInactivo)),
+          if (recibido) ...[
+            const SizedBox(height: 24),
+            OutlinedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Salir y ver después'),
+            ),
+          ],
         ],
       ),
     );

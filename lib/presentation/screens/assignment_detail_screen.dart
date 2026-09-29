@@ -6,7 +6,9 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/tarea.dart';
 import '../bloc/grading/grading_bloc.dart';
+import '../bloc/grading/grading_event.dart';
 import '../bloc/group/group_bloc.dart';
+import '../bloc/group/group_event.dart';
 import '../bloc/group/group_state.dart';
 import '../bloc/submission/submission_bloc.dart';
 import '../bloc/submission/submission_event.dart';
@@ -76,7 +78,17 @@ class AssignmentDetailScreen extends StatelessWidget {
     return BlocListener<SubmissionBloc, SubmissionState>(
       listener: (context, state) {
         if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
-        if (state is ArchivoInvalido) {
+        if (state is EnvioTerminado) {
+          // El alumno salió de la pantalla de progreso y la calificación llegó mientras veía la tarea
+          context.read<GroupBloc>().add(GroupsRequested());
+          context.read<GradingBloc>().add(HistorialRequested());
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.entrega.calificada
+                ? 'Tu ensayo ya fue calificado'
+                : 'Tu ensayo no pudo calificarse; puedes enviarlo de nuevo'),
+          ));
+          context.read<SubmissionBloc>().add(ArchivoDescartado());
+        } else if (state is ArchivoInvalido) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.mensaje), backgroundColor: AppTheme.rojoDeficiente),
           );
@@ -158,7 +170,7 @@ class AssignmentDetailScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   BlocBuilder<SubmissionBloc, SubmissionState>(
                     builder: (context, s) => ElevatedButton.icon(
-                      onPressed: s is Enviando ? null : () => _elegirArchivo(context),
+                      onPressed: s is Enviando || s is Procesando ? null : () => _elegirArchivo(context),
                       icon: const Icon(Icons.upload_file),
                       label: const Text('Subir archivo', style: TextStyle(fontSize: 16)),
                     ),

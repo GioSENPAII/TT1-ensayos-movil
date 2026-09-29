@@ -37,7 +37,24 @@ class Enviando extends SubmissionState {
   List<Object?> get props => [archivo.nombre];
 }
 
-/// El servidor recibió el ensayo; [entrega.estado] dice si quedó calificado o con error del motor.
+/// El servidor recibió el ensayo y lo está calificando en segundo plano; la app consulta su estado.
+/// El alumno ya puede salir de la pantalla: la calificación aparecerá en su historial.
+class Procesando extends SubmissionState {
+  final Entrega entrega;
+
+  /// Lleva más de lo normal (p. ej. el motor de IA estaba inactivo).
+  final bool lento;
+
+  /// La última consulta falló por red; se sigue intentando.
+  final bool sinConexion;
+
+  Procesando(this.entrega, {this.lento = false, this.sinConexion = false});
+
+  @override
+  List<Object?> get props => [entrega.id, lento, sinConexion];
+}
+
+/// La calificación terminó; [entrega.estado] dice si quedó calificado o con error del motor.
 class EnvioTerminado extends SubmissionState {
   final Entrega entrega;
   EnvioTerminado(this.entrega);

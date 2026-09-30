@@ -1,7 +1,10 @@
 class ApiConstants {
-  // Backend local (la cuenta de Google Cloud expiró).
-  // iOS simulator: 127.0.0.1 — Android emulator: 10.0.2.2
-  static const String baseUrl = 'http://127.0.0.1:8080/api/v1';
+  // Se elige al compilar, sin editar el código:
+  //   local (por defecto):  flutter run
+  //   emulador Android:     flutter run --dart-define=API_URL=http://10.0.2.2:8080/api/v1
+  //   nube (Cloud Run):     flutter run --dart-define=API_URL=https://<servicio>.run.app/api/v1
+  static const String baseUrl =
+      String.fromEnvironment('API_URL', defaultValue: 'http://127.0.0.1:8080/api/v1');
 
   // Rutas relativas a baseUrl (Tabla 55)
   static const String register = '/auth/register';

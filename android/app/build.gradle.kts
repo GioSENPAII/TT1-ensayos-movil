@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -19,6 +21,21 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    // Llave de firma del APK publicado: TT1/llaves/key.properties (fuera de git; respaldo en Secret
+    // Manager: ensayos-apk-keystore y ensayos-apk-key-properties). Sin ella se firma con la de depuración.
+    val llave = rootProject.file("../../llaves/key.properties")
+    val propsLlave = Properties().apply { if (llave.exists()) llave.inputStream().use { load(it) } }
+    signingConfigs {
+        if (llave.exists()) {
+            create("release") {
+                storeFile = file(propsLlave.getProperty("storeFile"))
+                storePassword = propsLlave.getProperty("storePassword")
+                keyAlias = propsLlave.getProperty("keyAlias")
+                keyPassword = propsLlave.getProperty("keyPassword")
+            }
+        }
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "mx.ipn.escom.tt.ensayos_movil"
@@ -32,9 +49,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 }

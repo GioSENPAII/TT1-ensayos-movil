@@ -25,7 +25,7 @@ class CriterioCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = colorNivel(criterio.nivel);
-    const cifras = TextStyle(fontFeatures: [FontFeature.tabularFigures()]);
+    const cifras = TextStyle(fontFamily: AppTheme.fuenteMono);
     return Card(
       clipBehavior: Clip.antiAlias,
       child: IntrinsicHeight(

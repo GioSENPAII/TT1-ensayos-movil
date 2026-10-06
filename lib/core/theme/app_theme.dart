@@ -14,7 +14,15 @@ class AppTheme {
   static const Color amarilloParcial = Color(0xFFF9A825);
   static const Color rojoDeficiente = Color(0xFFC62828);
 
+  // Tipografía (sección 4.8.2, Tabla 67): Noto Sans en toda la app y Noto Sans Mono para
+  // calificaciones y códigos de acceso
+  static const String fuente = 'NotoSans';
+  static const String fuenteMono = 'NotoSansMono';
+  // En Mono el punto decimal ocupa un ancho completo; en las calificaciones grandes se ve separado
+  static const double espaciadoCifras = -2;
+
   static ThemeData get theme => ThemeData(
+        fontFamily: fuente,
         colorScheme: ColorScheme.fromSeed(
           seedColor: guinda,
           primary: guinda,

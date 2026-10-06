@@ -88,7 +88,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                         style: const TextStyle(
                           fontSize: 28,
                           letterSpacing: 8,
-                          fontFamily: 'monospace',
+                          fontFamily: AppTheme.fuenteMono,
                           color: AppTheme.guinda,
                           fontWeight: FontWeight.w600,
                         ),

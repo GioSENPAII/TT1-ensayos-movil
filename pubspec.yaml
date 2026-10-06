@@ -38,3 +38,20 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/logo_ipn.png
+
+  # Tipografía oficial del IPN (sección 4.8.2, Tabla 67). Licencia: assets/fonts/OFL.txt
+  fonts:
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+        - asset: assets/fonts/NotoSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSans-Bold.ttf
+          weight: 700
+    - family: NotoSansMono
+      fonts:
+        - asset: assets/fonts/NotoSansMono-Regular.ttf
+        - asset: assets/fonts/NotoSansMono-SemiBold.ttf
+          weight: 600

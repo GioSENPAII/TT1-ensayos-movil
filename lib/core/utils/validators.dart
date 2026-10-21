@@ -19,12 +19,16 @@ class Validators {
     return null;
   }
 
-  /// RNF-10: mínimo 8 caracteres, una mayúscula, una minúscula y un número.
+  /// RNF-10: mínimo 8 caracteres, una mayúscula, una minúscula, un número y un
+  /// carácter especial (cualquier símbolo que no sea letra, número ni espacio).
   static String? password(String? v) {
     if (v == null || v.length < 8) return 'Mínimo 8 caracteres';
     if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Debe incluir al menos una mayúscula';
     if (!RegExp(r'[a-z]').hasMatch(v)) return 'Debe incluir al menos una minúscula';
     if (!RegExp(r'\d').hasMatch(v)) return 'Debe incluir al menos un número';
+    if (!RegExp(r'[^\p{L}\p{N}\s]', unicode: true).hasMatch(v)) {
+      return 'Debe incluir al menos un carácter especial (p. ej. ! # \$ % * .)';
+    }
     return null;
   }
 

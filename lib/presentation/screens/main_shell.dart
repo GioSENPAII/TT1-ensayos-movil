@@ -6,6 +6,7 @@ import '../bloc/grading/grading_bloc.dart';
 import '../bloc/grading/grading_event.dart';
 import '../bloc/group/group_bloc.dart';
 import '../bloc/group/group_event.dart';
+import '../bloc/profile/foto_perfil_cubit.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'submission_history_screen.dart';
@@ -27,6 +28,7 @@ class _MainShellState extends State<MainShell> {
       providers: [
         BlocProvider<GroupBloc>(create: (_) => sl<GroupBloc>()..add(GroupsRequested())),
         BlocProvider<GradingBloc>(create: (_) => sl<GradingBloc>()..add(HistorialRequested())),
+        BlocProvider<FotoPerfilCubit>(create: (_) => sl<FotoPerfilCubit>()..cargar()),
       ],
       child: Scaffold(
         body: IndexedStack(

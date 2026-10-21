@@ -117,7 +117,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       obscureText: _obscure,
                       decoration: InputDecoration(
                         labelText: 'Nueva contraseña',
-                        helperText: 'Mínimo 8 caracteres, con mayúscula, minúscula y número',
+                        helperText: 'Mínimo 8 caracteres, con mayúscula, minúscula, número y carácter especial',
+                        helperMaxLines: 2,
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           icon: Icon(_obscure

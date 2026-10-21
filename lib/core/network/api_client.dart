@@ -27,7 +27,15 @@ class ApiClient {
   /// Emite cuando la sesión ya no puede renovarse; el AuthBloc manda al login.
   Stream<void> get onSessionExpired => _sessionExpired.stream;
 
-  Future<dynamic> get(String path) => _send('GET', path);
+  Future<dynamic> get(String path, {bool auth = true}) => _send('GET', path, auth: auth);
+
+  /// Descarga un archivo binario (p. ej. una imagen). Devuelve null si el servidor responde 404.
+  Future<Uint8List?> getBytes(String path) async {
+    final response = await _responder(() => http.Request('GET', _uri(path)), auth: true);
+    if (response.statusCode == 200) return response.bodyBytes;
+    if (response.statusCode == 404) return null;
+    return _procesar(response); // lanza la excepción que corresponda
+  }
 
   Future<dynamic> post(String path, [Map<String, dynamic>? body, bool auth = true]) =>
       _send('POST', path, body: body, auth: auth);
@@ -50,9 +58,10 @@ class ApiClient {
     required Uint8List bytes,
     MediaType? tipo,
     Duration timeout = _timeout,
+    String metodo = 'POST',
   }) {
     // Se reconstruye en cada intento: un MultipartRequest no puede reenviarse
-    http.BaseRequest construir() => http.MultipartRequest('POST', _uri(path))
+    http.BaseRequest construir() => http.MultipartRequest(metodo, _uri(path))
       ..fields.addAll(campos)
       ..files.add(http.MultipartFile.fromBytes(campoArchivo, bytes,
           filename: nombreArchivo, contentType: tipo ?? MediaType('application', 'pdf')));
@@ -74,6 +83,11 @@ class ApiClient {
   Uri _uri(String path) => Uri.parse('${ApiConstants.baseUrl}$path');
 
   Future<dynamic> _ejecutar(http.BaseRequest Function() construir,
+          {required bool auth, Duration timeout = _timeout}) async =>
+      _procesar(await _responder(construir, auth: auth, timeout: timeout));
+
+  /// Envía la petición; con [auth], si el access token expiró lo renueva y reintenta una vez.
+  Future<http.Response> _responder(http.BaseRequest Function() construir,
       {required bool auth, Duration timeout = _timeout}) async {
     var response = await _request(construir(), auth, timeout);
 
@@ -87,7 +101,7 @@ class ApiClient {
         throw const SessionExpiredException();
       }
     }
-    return _procesar(response);
+    return response;
   }
 
   Future<http.Response> _request(http.BaseRequest request, bool auth, Duration timeout) async {

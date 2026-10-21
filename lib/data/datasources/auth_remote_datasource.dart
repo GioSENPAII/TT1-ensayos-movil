@@ -16,6 +16,7 @@ class AuthRemoteDatasource {
       'apellidos': apellidos,
       'correo': correo,
       'rol': 'ALUMNO', // la app móvil es exclusiva del alumno
+      'aceptaAvisoPrivacidad': true, // la pantalla de registro no deja continuar sin aceptarlo
     }, false);
     return data['message'] as String;
   }

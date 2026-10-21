@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Para elegir tu foto de perfil desde la galería.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Ensayos Movil</string>
 	<key>CFBundleExecutable</key>

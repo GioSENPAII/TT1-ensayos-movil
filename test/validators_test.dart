@@ -7,7 +7,10 @@ void main() {
     expect(Validators.password('sinmayuscula1'), isNotNull);
     expect(Validators.password('SINMINUSCULA1'), isNotNull);
     expect(Validators.password('SinNumeroAqui'), isNotNull);
-    expect(Validators.password('Prueba123'), isNull);
+    expect(Validators.password('SinEspecial123'), isNotNull);
+    expect(Validators.password('Contraseña 123'), isNotNull);
+    expect(Validators.password('Prueba123!'), isNull);
+    expect(Validators.password('Prueba.123'), isNull);
   });
 
   test('código de grupo: 6 alfanuméricos', () {

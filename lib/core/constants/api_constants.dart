@@ -15,6 +15,9 @@ class ApiConstants {
   static const String logout = '/auth/logout';
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
+  static const String avisoPrivacidad = '/auth/privacy-notice';
+
+  static const String miFoto = '/profile/photo';
 
   static const String misGrupos = '/students/me/groups';
   static const String unirseGrupo = '/groups/join';

@@ -52,7 +52,7 @@ class _EnsayosAppState extends State<EnsayosApp> {
           }
         },
         child: MaterialApp(
-          title: 'Ensayos ESCOM',
+          title: 'CalificaIA',
           theme: AppTheme.theme,
           debugShowCheckedModeBanner: false,
           navigatorKey: _navigatorKey,

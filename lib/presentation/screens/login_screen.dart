@@ -7,6 +7,7 @@ import '../bloc/auth/auth_state.dart';
 import '../../core/utils/validators.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
+import 'support_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -159,6 +160,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         '¿No tienes cuenta? Regístrate',
                         style: TextStyle(color: AppTheme.guinda),
                       ),
+                    ),
+                    // Soporte también antes de entrar: ayuda con el código, la contraseña o una cuenta suspendida
+                    TextButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const SupportScreen()),
+                      ),
+                      icon: const Icon(Icons.help_outline, size: 18, color: AppTheme.grisInactivo),
+                      label: const Text('¿Necesitas ayuda? Soporte',
+                          style: TextStyle(color: AppTheme.grisInactivo)),
                     ),
                     const SizedBox(height: 48),
                   ],

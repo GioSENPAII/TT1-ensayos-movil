@@ -10,6 +10,7 @@ import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
 import '../bloc/profile/foto_perfil_cubit.dart';
 import 'privacy_notice_screen.dart';
+import 'support_screen.dart';
 
 /// Perfil del alumno y cierre de sesión (ProfileScreen, CU-AUTH-05).
 class ProfileScreen extends StatelessWidget {
@@ -136,6 +137,18 @@ class ProfileScreen extends StatelessWidget {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const PrivacyNoticeScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.help_outline, color: AppTheme.guinda),
+              title: const Text('Soporte'),
+              subtitle: const Text('Preguntas frecuentes'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SupportScreen()),
               ),
             ),
           ),

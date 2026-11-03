@@ -67,7 +67,7 @@ void main() {
     await esperar(t, find.text('Aviso de privacidad'));
     await captura(t, '23_perfil');
 
-    await t.tap(find.bySemanticsLabel('Cambiar foto de perfil'));
+    await t.tap(find.byIcon(Icons.edit));
     await esperar(t, find.text('Elegir de la galería'));
     expect(find.text('Elegir de Archivos'), findsOneWidget);
     expect(find.textContaining('cámara', findRichText: true), findsNothing);

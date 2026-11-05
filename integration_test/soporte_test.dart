@@ -61,6 +61,12 @@ void main() {
 
     await t.scrollUntilVisible(find.text('¿No encontraste tu respuesta?'), 400,
         scrollable: find.byType(Scrollable).first);
+    // Los tres administradores (RN-AUTH-05) aparecen como contacto
+    await t.drag(find.byType(Scrollable).last, const Offset(0, -600));
+    await t.pumpAndSettle();
+    for (final correo in ['porraszuniga@gmail.com', 'joseeduardomayafabela@gmail.com', 'glongoria.3a.is@gmail.com']) {
+      expect(find.text(correo), findsOneWidget);
+    }
     await captura(t, '33_soporte_contacto');
   });
 }

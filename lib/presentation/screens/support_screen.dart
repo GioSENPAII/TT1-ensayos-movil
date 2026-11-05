@@ -7,6 +7,12 @@ import '../../core/theme/app_theme.dart';
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
 
+  static const _correosAdministradores = <String>[
+    'porraszuniga@gmail.com',
+    'joseeduardomayafabela@gmail.com',
+    'glongoria.3a.is@gmail.com',
+  ];
+
   // Las **negritas** se marcan como en Markdown
   static const _temas = <_Tema>[
     _Tema('Cuenta y acceso', Icons.person_outline, [
@@ -30,7 +36,7 @@ class SupportScreen extends StatelessWidget {
               'todas tus sesiones abiertas.'),
       _Pregunta('Me dice que mi cuenta está suspendida',
           'Las cuentas las suspende el administrador del sistema. Mientras esté suspendida no podrás entrar; '
-              'habla con tu profesor (consulta "¿No encontraste tu respuesta?" al final).'),
+              'escribe a los administradores (sus correos están en "¿No encontraste tu respuesta?", al final).'),
       _Pregunta('Me sacó de la sesión sin que la cerrara',
           'La sesión se renueva sola mientras usas la app. Si pasan muchos días sin entrar, si cambiaste tu '
               'contraseña o si se suspendió la cuenta, tendrás que iniciar sesión de nuevo.'),
@@ -133,16 +139,26 @@ class SupportScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Card(
               color: AppTheme.grisClaro,
-              child: const Padding(
-                padding: EdgeInsets.all(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('¿No encontraste tu respuesta?',
+                    const Text('¿No encontraste tu respuesta?',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.negro)),
-                    SizedBox(height: 8),
-                    _TextoConNegritas('Tu primer contacto es **tu profesor**: puede revisar tus entregas, '
+                    const SizedBox(height: 8),
+                    const _TextoConNegritas('Tu primer contacto es **tu profesor**: puede revisar tus entregas, '
                         'ampliar fechas de cierre y ajustar calificaciones.'),
+                    const SizedBox(height: 12),
+                    const _TextoConNegritas('Para problemas con tu cuenta, como una suspensión, escribe a los '
+                        '**administradores del sistema**:'),
+                    const SizedBox(height: 8),
+                    for (final correo in _correosAdministradores)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: SelectableText(correo,
+                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.guinda)),
+                      ),
                   ],
                 ),
               ),
